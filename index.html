@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tell me your birthday · KIT</title>
+<meta name="description" content="Add your birthday so it never gets forgotten. Ten seconds, no app, no account.">
+<meta property="og:title" content="Tell me your birthday">
+<meta property="og:description" content="So I never forget it. Ten seconds, no app needed.">
+<meta property="og:image" content="https://rodrigob-dev.github.io/kit-birthday/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#fde9f2">
+<meta name="robots" content="noindex">
+<link rel="icon" href="icon.png">
+<style>
+  :root {
+    --pink: #ed6ba8;
+    --pink-soft: #fde9f2;
+    --paper: #fff9fb;
+    --plum: #3d1c4f;
+    --plum-top: #572969;
+    --ink: #1f1724;
+    --muted: #6f6378;
+    --line: #eadde6;
+    --done: #33bd78;
+    --error: #c2334d;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    font-family: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(180deg, var(--pink-soft) 0%, var(--paper) 45%) fixed, var(--paper);
+    display: flex;
+    justify-content: center;
+    padding: max(28px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+  }
+  ::selection { background: rgba(237, 107, 168, .28); }
+  main {
+    width: 100%;
+    max-width: 420px;
+    align-self: flex-start;
+    margin-top: 6vh;
+  }
+  .card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 28px 22px 24px;
+    box-shadow: 0 10px 32px rgba(237, 107, 168, .16), 0 2px 6px rgba(61, 28, 79, .05);
+  }
+  .badge {
+    width: 64px; height: 64px;
+    border-radius: 20px;
+    display: grid; place-items: center;
+    background: linear-gradient(135deg, #ed6ba8, #b870db);
+    box-shadow: 0 8px 18px rgba(237, 107, 168, .32);
+    margin-bottom: 18px;
+  }
+  .badge.done { background: linear-gradient(135deg, #3fcf86, #2aa767); box-shadow: 0 8px 18px rgba(51, 189, 120, .3); }
+  h1 {
+    font-size: 26px;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+    text-wrap: balance;
+  }
+  p.lead { margin: 0 0 22px; color: var(--muted); font-size: 16px; line-height: 1.45; }
+  label { display: block; font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+  .field { margin-bottom: 16px; }
+  input, select {
+    width: 100%;
+    font: inherit;
+    font-size: 17px;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    padding: 13px 14px;
+    min-height: 50px;
+    caret-color: var(--pink);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%236f6378' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--pink); box-shadow: 0 0 0 4px rgba(237, 107, 168, .18); }
+  .row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 10px; }
+  button {
+    width: 100%;
+    min-height: 54px;
+    border: 0;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(180deg, var(--plum-top), var(--plum));
+    box-shadow: 0 8px 18px rgba(61, 28, 79, .28);
+    cursor: pointer;
+    margin-top: 6px;
+    transition: transform .12s ease, opacity .12s ease;
+  }
+  button:active { transform: scale(.98); }
+  button:focus-visible { outline: 3px solid rgba(237, 107, 168, .55); outline-offset: 3px; }
+  button[disabled] { opacity: .6; cursor: default; }
+  .note { font-size: 13px; color: var(--muted); text-align: center; margin: 14px 0 0; line-height: 1.4; }
+  .status { min-height: 20px; font-size: 14px; font-weight: 600; color: var(--error); margin: 12px 0 0; text-align: center; }
+  .hidden { display: none !important; }
+  footer { text-align: center; font-size: 13px; color: var(--muted); margin-top: 22px; line-height: 1.5; }
+  footer strong { color: var(--pink); }
+  @media (prefers-reduced-motion: reduce) { button { transition: none; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="card">
+    <div class="badge" id="badge" aria-hidden="true">
+      <svg id="cake" width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <path d="M16 3.5c1.6 1.7 2.2 3 1.6 4.1-.5.9-1.3 1.2-1.6 1.2s-1.1-.3-1.6-1.2c-.6-1.1 0-2.4 1.6-4.1z" fill="#fff"/>
+        <rect x="14.6" y="9.6" width="2.8" height="5" rx="1.2" fill="#fff"/>
+        <path d="M6 16.5c0-1.4 1.1-2.5 2.5-2.5h15c1.4 0 2.5 1.1 2.5 2.5v3.2c-1.1.9-2.1.9-3.2 0-1.1-.9-2.1-.9-3.2 0-1.1.9-2.1.9-3.2 0-1.1-.9-2.1-.9-3.2 0-1.1.9-2.1.9-3.2 0-1.1-.9-2.1-.9-3.2 0V16.5z" fill="#fff"/>
+        <path d="M6 22.2c1.1.6 2.2.6 3.2-.1 1.1-.8 2.1-.8 3.2 0 1.1.8 2.1.8 3.2 0 1.1-.8 2.1-.8 3.2 0 1.1.8 2.1.8 3.2 0 1.1-.8 2.1-.8 3.2.1V27a1.5 1.5 0 0 1-1.5 1.5h-17A1.5 1.5 0 0 1 6 27v-4.8z" fill="#fff" opacity=".85"/>
+      </svg>
+      <svg id="check" class="hidden" width="30" height="30" viewBox="0 0 30 30" fill="none">
+        <path d="M7.5 15.5l5 5 10-11" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <section id="ask">
+      <h1 id="title">Tell me your birthday</h1>
+      <p class="lead" id="lead">So I never forget it. Ten seconds, no app, no account.</p>
+      <form id="form" novalidate>
+        <div class="field">
+          <label for="name">Your name</label>
+          <input id="name" name="name" autocomplete="name" autocapitalize="words" maxlength="60" required placeholder="Ana Souza">
+        </div>
+        <div class="field row">
+          <div>
+            <label for="month">Month</label>
+            <select id="month" name="month" required></select>
+          </div>
+          <div>
+            <label for="day">Day</label>
+            <select id="day" name="day" required></select>
+          </div>
+        </div>
+        <button type="submit" id="save">Save my birthday</button>
+        <p class="status" id="status" role="alert" aria-live="assertive"></p>
+        <p class="note" id="note">Just the day and month. Only the person who sent you this link sees it.</p>
+      </form>
+    </section>
+
+    <section id="saved" class="hidden" aria-live="polite">
+      <h1 id="savedTitle">Saved</h1>
+      <p class="lead" id="savedLead">It's in. It won't be forgotten.</p>
+      <button type="button" id="again">Add someone else's</button>
+    </section>
+  </div>
+  <footer><strong>KIT</strong> · keep in touch with the people in your life</footer>
+</main>
+<script>
+(() => {
+  const SUPABASE_URL = "https://cgoxpngfkmtiitdtvgto.supabase.co";
+  const KEY = "sb_publishable_Pn6DjGaXaAwkVP6hDd5Wig_02ZSS3mW";
+  const token = new URLSearchParams(location.search).get("k") || "";
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const lengths = [31,29,31,30,31,30,31,31,30,31,30,31];
+  const $ = (id) => document.getElementById(id);
+  let owner = null;
+
+  // Selects: no default date, so nobody saves Jan 1 by accident.
+  const month = $("month"), day = $("day");
+  month.add(new Option("Month", "", true, true));
+  month.options[0].disabled = true;
+  months.forEach((m, i) => month.add(new Option(m, String(i + 1))));
+  function fillDays() {
+    const keep = day.value;
+    const max = month.value ? lengths[Number(month.value) - 1] : 31;
+    day.length = 0;
+    day.add(new Option("Day", "", true, true));
+    day.options[0].disabled = true;
+    for (let d = 1; d <= max; d++) day.add(new Option(String(d), String(d)));
+    if (keep && Number(keep) <= max) day.value = keep;
+  }
+  fillDays();
+  month.addEventListener("change", fillDays);
+
+  async function rpc(fn, body) {
+    const res = await fetch(SUPABASE_URL + "/rest/v1/rpc/" + fn, {
+      method: "POST",
+      headers: { "apikey": KEY, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const text = await res.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch (_) {}
+    if (!res.ok) throw new Error((data && data.message) || ("HTTP " + res.status));
+    return data;
+  }
+
+  function say(msg) { $("status").textContent = msg; }
+  function first(name) { return (name || "").trim().split(/\s+/)[0] || ""; }
+
+  if (!/^[0-9a-f]{32}$/.test(token)) {
+    $("title").textContent = "This link is missing a piece";
+    $("lead").textContent = "Ask for the link again: it should end with a long code.";
+    $("form").classList.add("hidden");
+    return;
+  }
+
+  // Whose link: their display name, set with textContent (never as HTML).
+  rpc("birthday_link_owner", { p_token: token }).then((name) => {
+    if (!name) {
+      $("title").textContent = "This link isn't working";
+      $("lead").textContent = "Ask for a new one.";
+      $("form").classList.add("hidden");
+      return;
+    }
+    owner = name;
+    $("title").textContent = first(name) + " wants to remember your birthday";
+    $("lead").textContent = "Add it once and " + first(name) + " won't miss it. Ten seconds, no app, no account.";
+    $("note").textContent = "Just the day and month. Only " + first(name) + " sees it.";
+  }).catch(() => { /* the form still works; the title stays generic */ });
+
+  $("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    say("");
+    const name = $("name").value.trim();
+    if (!name) { say("Add your name, so it's clear whose birthday it is."); $("name").focus(); return; }
+    if (!month.value || !day.value) { say("Pick the month and the day."); (month.value ? day : month).focus(); return; }
+    const save = $("save");
+    save.disabled = true;
+    save.textContent = "Saving…";
+    try {
+      await rpc("drop_birthday", { p_token: token, p_name: name, p_month: Number(month.value), p_day: Number(day.value) });
+      $("savedTitle").textContent = "Saved, " + first(name) + "!";
+      $("savedLead").textContent = (owner ? first(owner) : "They") + " won't forget your birthday now.";
+      $("ask").classList.add("hidden");
+      $("saved").classList.remove("hidden");
+      $("badge").classList.add("done");
+      $("cake").classList.add("hidden");
+      $("check").classList.remove("hidden");
+    } catch (err) {
+      const m = String(err.message || "");
+      say(m.includes("too many") ? "This link got a lot of birthdays today. Try again tomorrow."
+        : m.includes("unknown link") ? "This link isn't working anymore. Ask for a new one."
+        : m.includes("bad date") ? "That date doesn't exist. Check the day."
+        : "Couldn't save. Check your connection and try again.");
+    } finally {
+      save.disabled = false;
+      save.textContent = "Save my birthday";
+    }
+  });
+
+  // Someone else on the same phone (a partner, a kid): same link, clean form.
+  $("again").addEventListener("click", () => {
+    $("form").reset();
+    fillDays();
+    $("saved").classList.add("hidden");
+    $("ask").classList.remove("hidden");
+    $("badge").classList.remove("done");
+    $("cake").classList.remove("hidden");
+    $("check").classList.add("hidden");
+    $("name").focus();
+  });
+})();
+</script>
+</body>
+</html>
